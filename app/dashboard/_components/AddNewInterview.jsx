@@ -13,20 +13,23 @@ import { Textarea } from "@/components/ui/textarea";
 
 function AddNewInterview() {
   const [openDialog, setOpenDialog] = useState(false);
-  const [jobPosition, setJobPosition]=useState();
-  const [jobDesc, setJobDesc]=useState();
-  const [jobExperience, setJobExperience]=useState();
+  const [jobPosition, setJobPosition] = useState();
+  const [jobDesc, setJobDesc] = useState();
+  const [jobExperience, setJobExperience] = useState();
 
+  const onSubmit = (e) => {
+    e.preventDefault();
+    console.log(jobPosition, jobDesc, jobExperience);
 
-
-  const onSubmit=(e)=>{
-    e.preventDefault()
-    console.log(jobPosition,jobDesc,jobExperience);
-    
-
-  }
-
- 
+    const InputPrompt =
+      "Generate 10 interview questions and answers in JSON format tailored for the following job details: Job Position: " +
+      jobPosition +
+      " Job Description: " +
+      jobDesc +
+      " Years of Experience: " +
+      jobExperience +
+      " The JSON should have an array structure, where each question-answer pair is an object with question and answer fields. Ensure the questions test the core technical skills, problem-solving abilities, and behavioral aspects relevant to the job. Format the output neatly for integration.";
+  };
 
   return (
     <div>
@@ -59,18 +62,21 @@ function AddNewInterview() {
                       id="job-role"
                       placeholder="Ex. Front-end Developer"
                       required
-                      onChange={(event)=>setJobPosition(event.target.value)}
+                      onChange={(event) => setJobPosition(event.target.value)}
                     />
                   </div>
                   <div className="mt-7 my-3">
-                    <label className="text-emerald-800" htmlFor="job-description">
+                    <label
+                      className="text-emerald-800"
+                      htmlFor="job-description"
+                    >
                       Job Description/ Tech-stack (In short):
                     </label>
                     <Textarea
                       id="job-description"
                       placeholder="Ex. JavaScript, React, etc."
                       required
-                      onChange={(event)=>setJobDesc(event.target.value)}
+                      onChange={(event) => setJobDesc(event.target.value)}
                     />
                   </div>
                   <div className="mt-7 my-3">
@@ -82,7 +88,7 @@ function AddNewInterview() {
                       type="number"
                       placeholder="Ex. 1"
                       required
-                      onChange={(event)=>setJobExperience(event.target.value)}
+                      onChange={(event) => setJobExperience(event.target.value)}
                     />
                   </div>
                 </div>
