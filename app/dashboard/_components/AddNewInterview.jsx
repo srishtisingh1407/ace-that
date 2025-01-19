@@ -13,6 +13,18 @@ import { Textarea } from "@/components/ui/textarea";
 
 function AddNewInterview() {
   const [openDialog, setOpenDialog] = useState(false);
+  const [jobPosition, setJobPosition]=useState();
+  const [jobDesc, setJobDesc]=useState();
+  const [jobExperience, setJobExperience]=useState();
+
+
+
+  const onSubmit=(e)=>{
+    e.preventDefault()
+    console.log(jobPosition,jobDesc,jobExperience);
+    
+
+  }
 
  
 
@@ -33,7 +45,7 @@ function AddNewInterview() {
 
             <DialogDescription asChild>
               {/* Form element with onSubmit handler */}
-              <form >
+              <form onSubmit={onSubmit}>
                 <div>
                   <h2>
                     Add details about your job position, Job description, and
@@ -47,6 +59,7 @@ function AddNewInterview() {
                       id="job-role"
                       placeholder="Ex. Front-end Developer"
                       required
+                      onChange={(event)=>setJobPosition(event.target.value)}
                     />
                   </div>
                   <div className="mt-7 my-3">
@@ -57,6 +70,7 @@ function AddNewInterview() {
                       id="job-description"
                       placeholder="Ex. JavaScript, React, etc."
                       required
+                      onChange={(event)=>setJobDesc(event.target.value)}
                     />
                   </div>
                   <div className="mt-7 my-3">
@@ -68,6 +82,7 @@ function AddNewInterview() {
                       type="number"
                       placeholder="Ex. 1"
                       required
+                      onChange={(event)=>setJobExperience(event.target.value)}
                     />
                   </div>
                 </div>
