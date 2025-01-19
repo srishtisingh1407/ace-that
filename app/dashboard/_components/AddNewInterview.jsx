@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,25 +10,41 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { chatSession } from "@/utils/GeminiAIModel";
+import { Loader2 } from "lucide-react";
 
 function AddNewInterview() {
   const [openDialog, setOpenDialog] = useState(false);
   const [jobPosition, setJobPosition] = useState();
   const [jobDesc, setJobDesc] = useState();
   const [jobExperience, setJobExperience] = useState();
+  const [loading, setLoading] = useState(false);
+  const [jsonResponse, setJsonResponse] = useState([]);
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
+    setLoading(true);
     e.preventDefault();
     console.log(jobPosition, jobDesc, jobExperience);
 
     const InputPrompt =
-      "Generate 10 interview questions and answers in JSON format tailored for the following job details: Job Position: " +
+      "Generate " +
+      process.env.NEXT_PUBLIC_INTERVIEW_QUESTION_COUNT +
+      " interview questions and answers in JSON format tailored for the following job details: Job Position: " +
       jobPosition +
       " Job Description: " +
       jobDesc +
       " Years of Experience: " +
       jobExperience +
       " The JSON should have an array structure, where each question-answer pair is an object with question and answer fields. Ensure the questions test the core technical skills, problem-solving abilities, and behavioral aspects relevant to the job. Format the output neatly for integration.";
+
+    const result = await chatSession.sendMessage(InputPrompt);
+    const MockJsonResp = result.response
+      .text()
+      .replace("```json", "")
+      .replace("```", "");
+    console.log(JSON.parse(MockJsonResp));
+    setJsonResponse(MockJsonResp);
+    setLoading(false);
   };
 
   return (
@@ -47,7 +63,6 @@ function AddNewInterview() {
             </DialogTitle>
 
             <DialogDescription asChild>
-              {/* Form element with onSubmit handler */}
               <form onSubmit={onSubmit}>
                 <div>
                   <h2>
@@ -93,7 +108,6 @@ function AddNewInterview() {
                   </div>
                 </div>
 
-                {/* Submit and Cancel buttons inside the form */}
                 <div className="flex gap-5 justify-end mt-5">
                   <Button
                     type="button"
@@ -106,7 +120,15 @@ function AddNewInterview() {
                     type="submit"
                     className="bg-emerald-700 hover:bg-emerald-900"
                   >
-                    Start Interview
+                    {loading ? (
+                      <>
+                        {" "}
+                        <Loader2 className="mr-2 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      "Start Interview"
+                    )}
                   </Button>
                 </div>
               </form>
