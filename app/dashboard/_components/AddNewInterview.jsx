@@ -1,5 +1,6 @@
 "use client";
-import React, { use, useState } from "react";
+
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -17,21 +18,19 @@ import { v4 as uuidv4 } from "uuid";
 import { useUser } from "@clerk/nextjs";
 
 import { MockInterview } from "@/utils/schema";
-import moment from "moment";
 
 function AddNewInterview() {
   const [openDialog, setOpenDialog] = useState(false);
-  const [jobPosition, setJobPosition] = useState();
-  const [jobDesc, setJobDesc] = useState();
-  const [jobExperience, setJobExperience] = useState();
+  const [jobPosition, setJobPosition] = useState("");
+  const [jobDesc, setJobDesc] = useState("");
+  const [jobExperience, setJobExperience] = useState("");
   const [loading, setLoading] = useState(false);
   const [jsonResponse, setJsonResponse] = useState([]);
   const { user } = useUser();
 
   const onSubmit = async (e) => {
-    setLoading(true);
     e.preventDefault();
-    console.log(jobPosition, jobDesc, jobExperience);
+    setLoading(true);
 
     const InputPrompt =
       "Generate " +
@@ -45,30 +44,29 @@ function AddNewInterview() {
       " The JSON should have an array structure, where each question-answer pair is an object with question and answer fields. Ensure the questions test the core technical skills, problem-solving abilities, and behavioral aspects relevant to the job. Format the output neatly for integration.";
 
     const result = await chatSession.sendMessage(InputPrompt);
-    const MockJsonResp = result.response
-      .text()
-      .replace("```json", "")
-      .replace("```", "");
-    console.log(JSON.parse(MockJsonResp));
-    setJsonResponse(MockJsonResp);
+    const responseText = await result.response.text();
+    const MockJsonResp = responseText.replace("```json", "").replace("```", "");
+    const parsedJson = JSON.parse(MockJsonResp);
 
-    if (result) {
-      const resp = await db
-        .insert(MockInterview)
-        .values({
-          mockId: uuidv4(),
-          jsonMockResp: MockJsonResp,
-          jobPosition: jobPosition,
-          jobDesc: jobDesc,
-          jobExperience: jobExperience,
-          createdBy: user?.primaryEmailAddress?.emailAddress,
-          createdAt: moment().format("DD-MM-YYYY"),
-        })
-        .returning({ mockId: MockInterview.mockId });
-      console.log("Inserted Id: ", resp);
-    } else {
-      console.log("error, check again");
-    }
+    setJsonResponse(parsedJson);
+
+    const resp = await db.insert(MockInterview).values({
+      mockId: uuidv4(),
+      jsonMockResp: MockJsonResp,
+      jobPosition,
+      jobDesc,
+      jobExperience,
+      createdBy: user?.primaryEmailAddress?.emailAddress || "unknown",
+    });
+
+    console.log("Inserted Id: ", resp);
+
+    // Reset state and close dialog
+    setOpenDialog(false);
+    setJobPosition("");
+    setJobDesc("");
+    setJobExperience("");
+    setJsonResponse([]);
     setLoading(false);
   };
 
@@ -102,6 +100,7 @@ function AddNewInterview() {
                       id="job-role"
                       placeholder="Ex. Front-end Developer"
                       required
+                      value={jobPosition}
                       onChange={(event) => setJobPosition(event.target.value)}
                     />
                   </div>
@@ -116,6 +115,7 @@ function AddNewInterview() {
                       id="job-description"
                       placeholder="Ex. JavaScript, React, etc."
                       required
+                      value={jobDesc}
                       onChange={(event) => setJobDesc(event.target.value)}
                     />
                   </div>
@@ -128,7 +128,10 @@ function AddNewInterview() {
                       type="number"
                       placeholder="Ex. 1"
                       required
-                      onChange={(event) => setJobExperience(event.target.value)}
+                      value={jobExperience}
+                      onChange={(event) =>
+                        setJobExperience(event.target.value)
+                      }
                     />
                   </div>
                 </div>
@@ -147,7 +150,6 @@ function AddNewInterview() {
                   >
                     {loading ? (
                       <>
-                        {" "}
                         <Loader2 className="mr-2 animate-spin" />
                         Generating...
                       </>
