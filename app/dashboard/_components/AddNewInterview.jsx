@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { chatSession } from "@/utils/GeminiAIModel";
-import { Loader2 } from "lucide-react";
+import { Loader2, Loader2Icon } from "lucide-react";
 import { db } from "@/utils/db";
 import { v4 as uuidv4 } from "uuid";
 import { useUser } from "@clerk/nextjs";
@@ -31,6 +31,8 @@ function AddNewInterview() {
   const onSubmit = async (e) => {
     setLoading(true);
     e.preventDefault();
+   
+    
     console.log(jobPosition, jobDesc, jobExperience);
 
     const InputPrompt =
@@ -45,30 +47,15 @@ function AddNewInterview() {
       " The JSON should have an array structure, where each question-answer pair is an object with question and answer fields. Ensure the questions test the core technical skills, problem-solving abilities, and behavioral aspects relevant to the job. Format the output neatly for integration.";
 
     const result = await chatSession.sendMessage(InputPrompt);
-    const MockJsonResp = result.response
-      .text()
+    
+    
+    const MockJsonResp =( result.response
+      .text())
       .replace("```json", "")
       .replace("```", "");
     console.log(JSON.parse(MockJsonResp));
     setJsonResponse(MockJsonResp);
-
-    if (result) {
-      const resp = await db
-        .insert(MockInterview)
-        .values({
-          mockId:uuidv4(),
-          jsonMockResp: MockJsonResp,
-          jobPosition: jobPosition,
-          jobDesc: jobDesc,
-          jobExperience: jobExperience,
-          createdBy: user?.primaryEmailAddress?.emailAddress,
-          
-        })
-        .returning({ mockId: MockInterview.mockId });
-      console.log("Inserted Id: ", resp);
-    } else {
-      console.log("error, check again");
-    }
+    
     setLoading(false);
   };
 
@@ -148,7 +135,7 @@ function AddNewInterview() {
                     {loading ? (
                       <>
                         {" "}
-                        <Loader2 className="mr-2 animate-spin" />
+                        <Loader2Icon className="mr-2 animate-spin" />
                         Generating...
                       </>
                     ) : (
